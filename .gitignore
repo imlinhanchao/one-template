@@ -1,0 +1,11 @@
+node_modules
+.dist
+.vscode/.mcp.json
+coverage
+.DS_Store
+dist
+vite.svg
+*.tsbuildinfo
+.agents
+config.json
+release
