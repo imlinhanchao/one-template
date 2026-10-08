@@ -1,4 +1,4 @@
-# Development Template
+# One Template
 
 ## 简介
 这是一个通用的前后端模板（Vue 3 + Vite 前端，NestJS 后端），包含常用的认证、验证、基础组件和开发流水线。该模板已从 haide 项目抽取通用模块并去除业务耦合，适合作为新项目的起点。
