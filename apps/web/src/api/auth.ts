@@ -1,31 +1,64 @@
-import request from '../utils/http'
-
+import request from "../utils/http";
 
 export interface RegisterData {
-  username: string
-  password: string
+  username: string;
+  password: string;
+  email: string;
+  nickname?: string;
+}
+
+export interface LoginParams {
+  username: string;
+  password: string;
 }
 
 export interface AuthResponse {
-  access_token: string
+  access_token: string;
   user: {
-    id: number
-    username: string
-    isAdmin: boolean
-    points: number
-  }
+    id: string;
+    username: string;
+    from?: string;
+    isAdmin: boolean;
+    points?: number;
+  };
 }
 
 /**
- * User login
+ * User account login
+ */
+export function loginWithAccount(data: LoginParams) {
+  return request.post<AuthResponse>(
+    { url: "/auth/login", data },
+    { errorMessageMode: "none" },
+  );
+}
+
+/**
+ * User register
+ */
+export function registerAccount(data: RegisterData) {
+  return request.post<{ id: number; username: string }>(
+    { url: "/auth/register", data },
+    { errorMessageMode: "none" },
+  );
+}
+
+/**
+ * Third-party OAuth login
  */
 export function login(source: string, params: any) {
-  return request.get<AuthResponse>({ url: `/auth/login/${source}`, params }, { errorMessageMode: 'none' })
+  return request.get<AuthResponse>(
+    { url: `/auth/login/${source}`, params },
+    { errorMessageMode: "none" },
+  );
 }
 
 /**
  * Login Support
  */
 export function getLoginSupport() {
-  return request.get<{ thirdParty: string[] }>({ url: '/auth/login/support' }, { errorMessageMode: 'none' })
+  return request.get<{ thirdParty: string[] }>(
+    { url: "/auth/login/support" },
+    { errorMessageMode: "none" },
+  );
 }

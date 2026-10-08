@@ -10,6 +10,9 @@ export interface ConfigData {
   port: number;
   jwtSecret: string;
   salt: string;
+  upload?: string;
+  uploadKey?: string;
+  uploadUrl?: string;
   github: {
     clientId: string;
     clientSecret: string;
@@ -18,6 +21,16 @@ export interface ConfigData {
     apiKey: string;
     mirror?: string;
   };
+  mail?: {
+    host?: string;
+    port?: number;
+    secure?: boolean;
+    user?: string;
+    pass?: string;
+    from?: string;
+  };
+  noticeGoldenKey?: string;
+  noticeUsers?: string;
 }
 
 export interface ConfigStatus {

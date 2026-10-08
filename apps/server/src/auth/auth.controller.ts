@@ -17,6 +17,7 @@ import { AuthService } from './auth.service';
 import Fishpi from 'fishpi';
 import { ApiTags } from '@nestjs/swagger';
 import { ConfigService } from 'src/config/config.service';
+import { getDomain, getHost } from '../utils';
 
 export interface IRegisterBody {
   username: string;
@@ -66,6 +67,20 @@ export class AuthController {
     return await this.authService.login(body);
   }
 
+  @Post('verification')
+  async verification(@Body() body: { token: string }) {
+    return await this.authService.verifyEmail(body.token);
+  }
+
+  @Post('resend-verification')
+  async resendVerification(
+    @Request() req: ExpressRequest,
+    @Body() body: { email: string },
+  ) {
+    const domain = getHost(req);
+    return await this.authService.resendVerification(body.email, domain);
+  }
+
   @Get('login/fishpi')
   async loginFishpi(
     @Request() req: ExpressRequest,
@@ -81,9 +96,7 @@ export class AuthController {
         throw new Error('Fishpi OAuth 验证失败');
       }
     } else {
-      const domain = new URL(
-        req.headers.referer || `${req.protocol}://${req.headers.host}`,
-      ).origin;
+      const domain = getDomain(req);
       res.redirect(fishpi.generateAuthURL(domain + '/#/login/fishpi'));
     }
   }
@@ -94,9 +107,7 @@ export class AuthController {
     @Response() res: ExpressResponse,
     @Query() query,
   ) {
-    const domain = new URL(
-      req.headers.referer || `${req.protocol}://${req.headers.host}`,
-    ).host;
+    const domain = getHost(req);
     const clientId = this.configService.get('github')?.clientId;
     if (!clientId) return res.end('GitHub OAuth 未配置，请联系管理员');
     if (req.query['code']) {
@@ -112,9 +123,7 @@ export class AuthController {
     @Response() res: ExpressResponse,
     @Query() query,
   ) {
-    const domain = new URL(
-      req.headers.referer || `${req.protocol}://${req.headers.host}`,
-    ).host;
+    const domain = getHost(req);
     if (query['openid.mode'] === 'id_res') {
       const steamid = await Steam.verify(query);
       if (steamid) {

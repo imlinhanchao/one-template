@@ -16,23 +16,7 @@ const router = createRouter({
             title: "首页",
           },
         },
-        {
-          path: "/story-editor",
-          name: "story-editor",
-          component: () => import("@/views/StoryEditorView.vue"),
-          meta: {
-            title: "故事编辑器",
-          },
-        },
-        {
-          path: "/story-play/:storyId?",
-          name: "story-play",
-          component: () => import("@/views/StoryPlayView.vue"),
-          meta: {
-            title: "故事播放",
-          },
-        }
-      ]
+      ],
     },
     {
       path: "/login",
@@ -51,13 +35,38 @@ const router = createRouter({
       },
     },
     {
+      path: "/:username/verification",
+      name: "user-verification",
+      component: () => import('@/views/EmailVerificationView.vue'),
+      meta: {
+        title: "邮箱验证",
+      },
+    },
+    {
+      path: "/:from/:username/verification",
+      name: "user-verification-from",
+      component: () => import('@/views/EmailVerificationView.vue'),
+      meta: {
+        title: "邮箱验证",
+      },
+    },
+    {
       path: "/config",
       name: "config",
       component: () => import("@/views/sys/config.vue"),
       meta: {
         title: "系统配置",
       },
-    }
+    },
+    {
+      path: "/:username",
+      name: "user-profile",
+      component: () => import('@/views/UserProfileView.vue'),
+      meta: {
+        title: "用户资料",
+      },
+    },
+
   ],
   scrollBehavior() {
     return { top: 0 };

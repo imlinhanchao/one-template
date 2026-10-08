@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from './user.entity';
+import { User } from './users.entity';
 import Fishpi from 'fishpi';
 import * as crypto from 'crypto';
 import * as GitHub from '../lib/github';
@@ -94,5 +94,27 @@ export class UsersService {
       from: 'steam',
       sourceId: userInfo.steamid,
     });
+  }
+
+  async verifyByToken(token: string) {
+    if (!token) return null;
+    const user = await this.usersRepository.findOne({
+      where: { verificationToken: token },
+    });
+    if (!user) return null;
+    user.verificationToken = '';
+    user.isVerified = true;
+    await this.usersRepository.update({ id: user.id }, user);
+    return user;
+  }
+
+  async setVerificationTokenByEmail(email: string, token: string) {
+    if (!email) return null;
+    const user = await this.findByEmail(email);
+    if (!user) return null;
+    user.verificationToken = token;
+    user.lastVerifyMailTime = Date.now();
+    await this.usersRepository.update({ id: user.id }, user);
+    return this.findByEmail(email);
   }
 }

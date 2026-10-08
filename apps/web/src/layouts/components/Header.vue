@@ -9,7 +9,7 @@
 
       <HeaderNav />
 
-      <HeaderRight/>
+      <HeaderRight />
     </div>
   </header>
 </template>
@@ -18,15 +18,4 @@
 import HeaderLogo from "./HeaderLogo.vue";
 import HeaderNav from "./HeaderNav.vue";
 import HeaderRight from "./HeaderRight.vue";
-
-defineProps<{
-  brand: string;
-  navItems: Array<{ label: string; path: string }>;
-  theme: "light" | "dark";
-  themeLabel: string;
-}>();
-
-defineEmits<{
-  toggleTheme: [];
-}>();
 </script>

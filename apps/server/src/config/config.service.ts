@@ -37,4 +37,13 @@ export class ConfigService {
     const config = ConfigService.getConfig();
     return config ? config[key] : null;
   }
+
+  static isMailConfigured(): boolean {
+    const mail = this.get('mail');
+    return !!(mail && mail.host && mail.user);
+  }
+
+  isMailConfigured(): boolean {
+    return ConfigService.isMailConfigured();
+  }
 }

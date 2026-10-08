@@ -8,7 +8,7 @@
   "scripts": {
     "build": "nest build",
     "postbuild:assets": "copyfiles assets/**/* ../../release/",
-    "postbuild:copy": "copyfiles package.json package-lock.json ../release/",
+    "postbuild:copy": "copyfiles package.json package-lock.json ../../release/",
     "postbuild": "npm run postbuild:assets && npm run postbuild:copy",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "prestart": "npm run postbuild:assets",
@@ -39,7 +39,8 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "swagger-ui-express": "^5.0.1",
-    "typeorm": "^1.1.0"
+    "typeorm": "^1.1.0",
+    "nodemailer": "^6.9.4"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

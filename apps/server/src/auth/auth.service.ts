@@ -5,10 +5,11 @@ import { UsersService } from '../users/users.service';
 import { IUserLite } from 'fishpi';
 import * as GitHub from '../lib/github';
 import { IRegisterBody } from './auth.controller';
-import { User } from 'src/users/user.entity';
+import { User } from 'src/users/users.entity';
 import { ConfigService } from 'src/config/config.service';
 import path from 'path';
 import fs from 'fs';
+import { sendVerifyMail, isMailConfigured } from '../lib/mail';
 
 @Injectable()
 export class AuthService {
@@ -33,15 +34,84 @@ export class AuthService {
     const emailUser = await this.usersService.findByEmail(body.email);
     if (emailUser) throw new Error('邮箱已被注册');
 
-    return await this.usersService.save(
-      new User({
-        username: body.username,
-        password: body.password,
-        email: body.email,
-        nickname: body.nickname,
-        from: 'fishpi',
-      }),
+    const token = crypto.randomBytes(20).toString('hex');
+    const newUser = new User({
+      username: body.username,
+      password: body.password,
+      email: body.email,
+      nickname: body.nickname,
+      from: '',
+    });
+    newUser.verificationToken = token;
+    newUser.isVerified = false;
+    newUser.lastVerifyMailTime = Date.now();
+
+    const account = await this.usersService.save(newUser);
+
+    const domain = process.env.DOMAIN || 'http://localhost:3000';
+
+    try {
+      if (isMailConfigured()) {
+        const verifyUrl = `${domain}/#/${account.username}/verification/?token=${token}`;
+        await sendVerifyMail({
+          to: account.email,
+          nickname: account.nickname || account.username,
+          verifyUrl,
+          domain,
+        });
+      }
+    } catch (err) {
+      console.error('发送验证邮件失败', err);
+    }
+
+    return account;
+  }
+
+  async verifyEmail(token: string) {
+    if (!token) throw new Error('token 不能为空');
+    const user = await this.usersService.verifyByToken(token);
+    if (!user) throw new Error('验证 Token 无效或已过期');
+    return { success: true };
+  }
+
+  async resendVerification(email: string, domain: string) {
+    if (!email) throw new Error('邮箱不能为空');
+    const user = await this.usersService.findByEmail(email);
+    if (!user) throw new Error('用户不存在');
+    if (user.isVerified) throw new Error('用户已激活');
+
+    const ONE_HOUR = 3600 * 1000;
+    const lastTime = Number(user.lastVerifyMailTime) || 0;
+    if (lastTime && Date.now() - lastTime < ONE_HOUR) {
+      const remainingMinutes = Math.ceil(
+        (ONE_HOUR - (Date.now() - lastTime)) / 60000,
+      );
+      throw new Error(
+        `验证邮件发送过于频繁，请在 ${remainingMinutes} 分钟后再试`,
+      );
+    }
+
+    const token = crypto.randomBytes(20).toString('hex');
+    const updated = await this.usersService.setVerificationTokenByEmail(
+      email,
+      token,
     );
+    if (!updated) throw new Error('设置验证 Token 失败');
+
+    try {
+      const verifyUrl = `${domain}/#/${updated.username}/verification/?token=${token}`;
+      const res = await sendVerifyMail({
+        to: updated.email,
+        nickname: updated.nickname || updated.username,
+        verifyUrl,
+        domain,
+      });
+      console.log('发送验证邮件结果', res);
+      return { success: true };
+    } catch (err) {
+      console.error('发送验证邮件失败', err);
+      throw new Error(err?.message || '发送验证邮件失败');
+    }
   }
 
   async login(body: { username: string; password: string }) {
@@ -59,6 +129,7 @@ export class AuthService {
       user: {
         id: user.id,
         username: user.username,
+        from: user.from,
         isAdmin,
       },
     };
@@ -75,6 +146,7 @@ export class AuthService {
       user: {
         id: user.oId,
         username: user.userName,
+        from: userDetail.from,
         isAdmin,
       },
     };
@@ -97,6 +169,7 @@ export class AuthService {
         user: {
           id: userInfo.sourceId,
           username: userInfo.username,
+          from: userInfo.from,
           isAdmin,
         },
       };
@@ -120,6 +193,7 @@ export class AuthService {
       user: {
         id: userInfo.sourceId,
         username: userInfo.username,
+        from: userInfo.from,
         isAdmin,
       },
     };
