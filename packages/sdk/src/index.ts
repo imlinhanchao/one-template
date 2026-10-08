@@ -4,6 +4,6 @@ export class SDK {
   }
 
   hello() {
-    console.log("Hello from SDK");
+    return "Hello from SDK";
   }
 }

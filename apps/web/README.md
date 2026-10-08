@@ -1,6 +1,6 @@
-# Haide UI Template
+# Template
 
-一个基于 Vue 3 + TypeScript + Vite 的前端开发模板，集成了 Vue Router、Pinia、UnoCSS 和 daisyUI，并采用 Header / Content / Footer 的 layout 架构。
+一个基于 Vue 3 + TypeScript + Vite 的前端开发模板，集成了 Vue Router、Pinia、Tailwind 和 daisyUI，并采用 Header / Content / Footer 的 layout 架构。
 
 ## 技术栈
 
@@ -9,7 +9,6 @@
 - Vite
 - Vue Router
 - Pinia
-- UnoCSS
 - Tailwind CSS v4 + daisyUI
 
 ## 启动
